@@ -1,80 +1,40 @@
 package com.graizely.dices.entity;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import org.springframework.hateoas.RepresentationModel;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import java.util.Objects;
+import javax.persistence.*;
+import java.util.Map;
 
 @Entity
+@Data
+@NoArgsConstructor
+@EqualsAndHashCode(callSuper=false)
+@Table(name = "simulation")
 public class DiceRollSimulation extends RepresentationModel<DiceRollSimulation> {
-    private @Id @GeneratedValue Long id;
+
+    @Id
+    @GeneratedValue
+    @Column(name = "id")
+    private Long id;
+
     private int dicesCount;
     private int dicesSides;
-    private int rollsCount;
 
-    public DiceRollSimulation() {
-    }
+    @ElementCollection
+    @CollectionTable(name = "simulation_incidence_mapping",
+            joinColumns = {@JoinColumn(name = "simulation_id", referencedColumnName = "id")})
+    @MapKeyColumn(name = "sum")
+    @Column(name = "distribution")
+    private Map<Integer, Integer> distribution;
 
-    public DiceRollSimulation(int dicesCount, int dicesSides, int rollsCount) {
+    public DiceRollSimulation(int dicesCount, int dicesSides, @NonNull Map<Integer, Integer> distribution) {
         this.dicesCount = dicesCount;
         this.dicesSides = dicesSides;
-        this.rollsCount = rollsCount;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public int getDicesCount() {
-        return dicesCount;
-    }
-
-    public int getRollsCount() {
-        return rollsCount;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setDicesCount(int dicesCount) {
-        this.dicesCount = dicesCount;
-    }
-
-    public void setRollsCount(int rollsCount) {
-        this.rollsCount = rollsCount;
-    }
-
-    public int getDicesSides() {
-        return dicesSides;
-    }
-
-    public void setDicesSides(int dicesSides) {
-        this.dicesSides = dicesSides;
-    }
-    @Override
-    public String toString() {
-        return "DiceRollSimulation{" +
-                "id=" + id +
-                ", dicesCount=" + dicesCount +
-                ", rollsCount=" + rollsCount +
-                ", dicesSides=" + dicesSides +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof DiceRollSimulation)) return false;
-        DiceRollSimulation that = (DiceRollSimulation) o;
-        return dicesCount == that.dicesCount && dicesSides == that.dicesSides && rollsCount == that.rollsCount && id.equals(that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, dicesCount, dicesSides, rollsCount);
+        this.distribution = distribution;
     }
 
 }
