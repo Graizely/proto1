@@ -1,12 +1,14 @@
 package com.graizely.dices.entity;
 
+import org.springframework.hateoas.RepresentationModel;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import java.util.Objects;
 
 @Entity
-public class DiceRollSimulation {
+public class DiceRollSimulation extends RepresentationModel<DiceRollSimulation> {
     private @Id @GeneratedValue Long id;
     private int dicesCount;
     private int dicesSides;
