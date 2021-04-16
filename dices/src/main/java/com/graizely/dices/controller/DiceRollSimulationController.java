@@ -8,8 +8,10 @@ import com.graizely.dices.services.DiceRollSimulationService;
 import lombok.AllArgsConstructor;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.Min;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,6 +20,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @AllArgsConstructor
+@Validated
 public class DiceRollSimulationController {
 
     // todo: repository already here? Use service!
@@ -37,8 +40,8 @@ public class DiceRollSimulationController {
 
     @GetMapping("/relative")
     public EntityModel<DiceRollSimulationRelative> relative(
-            @RequestParam(value = "dicesCount", required = true) Integer dices,
-            @RequestParam(value = "dicesSides", required = true) Integer sides) {
+            @RequestParam(value = "dicesCount", required = true) @Min(1) Integer dices,
+            @RequestParam(value = "dicesSides", required = true) @Min(4)  Integer sides) {
 
         DiceRollSimulationRelative simulation = service.getSimulationRelative(dices, sides);
         return EntityModel.of(simulation,
@@ -47,8 +50,8 @@ public class DiceRollSimulationController {
 
     @GetMapping("/total")
     public CollectionModel<EntityModel<DiceRollSimulation>> total(
-            @RequestParam(value = "dicesCount", required = false) Integer dices,
-            @RequestParam(value = "dicesSides", required = false) Integer sides) {
+            @RequestParam(value = "dicesCount", required = false) @Min(1) Integer dices,
+            @RequestParam(value = "dicesSides", required = false) @Min(4) Integer sides) {
 
         List<EntityModel<DiceRollSimulation>> simulations;
 
@@ -77,9 +80,9 @@ public class DiceRollSimulationController {
     // todo Input validation
     @PostMapping("/simulation")
     EntityModel<DiceRollSimulation> newDiceRollSimulation(
-            @RequestParam(value = "dices", defaultValue = "3") int dices,
-            @RequestParam(value = "sides", defaultValue = "6") int sides,
-            @RequestParam(value = "rolls", defaultValue = "100") int rolls) {
+            @RequestParam(value = "dices", defaultValue = "3") @Min(1) int dices,
+            @RequestParam(value = "sides", defaultValue = "6") @Min(4) int sides,
+            @RequestParam(value = "rolls", defaultValue = "100") @Min(1) int rolls) {
 
         DiceRollSimulation simulation = service.createSimulation(dices, sides, rolls);
 
