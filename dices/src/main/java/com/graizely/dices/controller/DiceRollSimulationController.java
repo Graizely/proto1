@@ -3,14 +3,12 @@ package com.graizely.dices.controller;
 import com.graizely.dices.DiceRollSimulationModelAssembler;
 import com.graizely.dices.entity.DiceRollSimulation;
 import com.graizely.dices.repository.DiceRollSimulationRepository;
-import com.graizely.dices.services.DiceRollSimulator;
-import lombok.NonNull;
+import com.graizely.dices.services.DiceRollSimulationService;
+import lombok.AllArgsConstructor;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,30 +16,16 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
+@AllArgsConstructor
 public class DiceRollSimulationController {
 
     // todo: repository already here? Use service!
     private final DiceRollSimulationRepository repository;
-    private final DiceRollSimulator simulator;
     private final DiceRollSimulationModelAssembler assembler;
+    private final DiceRollSimulationService service;
 
-    DiceRollSimulationController(
-            @NonNull DiceRollSimulationRepository repository,
-            @NonNull DiceRollSimulator simulator,
-            @NonNull DiceRollSimulationModelAssembler assembler) {
-
-        this.repository = repository;
-        this.simulator = simulator;
-        this.assembler = assembler;
-    }
-
-    @GetMapping("/simulations")
+    @GetMapping("/simulation")
     public CollectionModel<EntityModel<DiceRollSimulation>> all() {
-
-//        var s1 = simulator.run(3,6, 100);
-//        List<EntityModel<DiceRollSimulation>> simulations = Arrays.asList(s1).stream()
-//                .map(assembler::toModel)
-//                .collect(Collectors.toList());
 
         List<EntityModel<DiceRollSimulation>> simulations = repository.findAll().stream()
                 .map(assembler::toModel)
@@ -50,12 +34,50 @@ public class DiceRollSimulationController {
         return CollectionModel.of(simulations, linkTo(methodOn(DiceRollSimulationController.class).all()).withSelfRel());
     }
 
-    @PostMapping("/simulations")
-    DiceRollSimulation newDiceRollSimulation(@RequestBody DiceRollSimulation newDiceRollSimulation) {
-        return repository.save(newDiceRollSimulation);
+    @GetMapping("/total")
+    public CollectionModel<EntityModel<DiceRollSimulation>> total(
+            @RequestParam(value = "dicesCount", required = false) Integer dices,
+            @RequestParam(value = "dicesSides", required = false) Integer sides) {
+
+        List<EntityModel<DiceRollSimulation>> simulations;
+
+        if (dices != null && sides != null) {
+            // todo
+            simulations = service.getSimulationTotals(dices, sides).stream()
+                    .map(assembler::toTotalModel)
+                    .collect(Collectors.toList());;
+        }
+        // todo check single param?
+        else {
+            simulations = service.getSimulationTotals().stream()
+                    .map(assembler::toTotalModel)
+                    .collect(Collectors.toList());
+        }
+
+        return CollectionModel.of(simulations, linkTo(methodOn(DiceRollSimulationController.class).total(null, null)).withSelfRel());
+    }
+    /**
+     * Assignment 1
+     * @param dices
+     * @param sides
+     * @param rolls
+     * @return
+     */
+    // todo Input validation
+    @PostMapping("/simulation")
+    EntityModel<DiceRollSimulation> newDiceRollSimulation(
+            @RequestParam(value = "dices", defaultValue = "3") int dices,
+            @RequestParam(value = "sides", defaultValue = "6") int sides,
+            @RequestParam(value = "rolls", defaultValue = "100") int rolls) {
+
+        DiceRollSimulation simulation = service.createSimulation(dices, sides, rolls);
+
+        // todo return from repo bc. of ID? seems not
+
+        return assembler.toModel(simulation); //repository.save(newDiceRollSimulation);
     }
 
-    @GetMapping("/simulations/{id}")
+    @GetMapping("/simulation/{id}")
     public EntityModel<DiceRollSimulation> one(@PathVariable Long id) {
 
         DiceRollSimulation simulation = repository.findById(id)

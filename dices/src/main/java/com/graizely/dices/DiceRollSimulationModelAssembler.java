@@ -8,7 +8,6 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,5 +33,11 @@ public class DiceRollSimulationModelAssembler
                                                         .collect(Collectors.toList());
 
         return CollectionModel.of(list, linkTo(methodOn(DiceRollSimulationController.class).all()).withSelfRel());
+    }
+
+    public EntityModel<DiceRollSimulation> toTotalModel(DiceRollSimulation simulation) {
+        return EntityModel.of(simulation,
+                linkTo(methodOn(DiceRollSimulationController.class).total(simulation.getDicesCount(), simulation.getDicesSides())).withSelfRel(),
+                linkTo(methodOn(DiceRollSimulationController.class)).withRel("total"));
     }
 }
