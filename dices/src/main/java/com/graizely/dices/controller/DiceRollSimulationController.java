@@ -2,6 +2,7 @@ package com.graizely.dices.controller;
 
 import com.graizely.dices.DiceRollSimulationModelAssembler;
 import com.graizely.dices.entity.DiceRollSimulation;
+import com.graizely.dices.model.DiceRollSimulationRelative;
 import com.graizely.dices.repository.DiceRollSimulationRepository;
 import com.graizely.dices.services.DiceRollSimulationService;
 import lombok.AllArgsConstructor;
@@ -32,6 +33,16 @@ public class DiceRollSimulationController {
                 .collect(Collectors.toList());
 
         return CollectionModel.of(simulations, linkTo(methodOn(DiceRollSimulationController.class).all()).withSelfRel());
+    }
+
+    @GetMapping("/relative")
+    public EntityModel<DiceRollSimulationRelative> relative(
+            @RequestParam(value = "dicesCount", required = true) Integer dices,
+            @RequestParam(value = "dicesSides", required = true) Integer sides) {
+
+        DiceRollSimulationRelative simulation = service.getSimulationRelative(dices, sides);
+        return EntityModel.of(simulation,
+                linkTo(methodOn(DiceRollSimulationController.class).relative(simulation.getDicesCount(), simulation.getDicesSides())).withSelfRel());
     }
 
     @GetMapping("/total")

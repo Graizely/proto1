@@ -2,6 +2,7 @@
 package com.graizely.dices.services;
 
 import com.graizely.dices.entity.DiceRollSimulation;
+import com.graizely.dices.model.DiceRollSimulationRelative;
 import com.graizely.dices.repository.DiceRollSimulationRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,15 @@ public class DiceRollSimulationService {
     public DiceRollSimulation createSimulation(int dices, int sides, int rolls) {
         DiceRollSimulation simulation = simulator.run(dices, sides, rolls);
         return repository.save(simulation);
+    }
+
+    public DiceRollSimulationRelative getSimulationRelative(int dices, int sides) {
+        List<DiceRollSimulation> simulations = getSimulationTotals(dices, sides);
+        if (simulations.isEmpty()) {
+            return null;
+        }
+
+        return DiceRollSimulationRelative.from(simulations.get(0));
     }
 
     public List<DiceRollSimulation> getSimulationTotals(int dices, int sides) {
