@@ -56,7 +56,6 @@ public class DiceRollSimulationController {
         List<EntityModel<DiceRollSimulation>> simulations;
 
         if (dices != null && sides != null) {
-            // todo
             simulations = service.getSimulationTotals(dices, sides).stream()
                     .map(assembler::toTotalModel)
                     .collect(Collectors.toList());;
